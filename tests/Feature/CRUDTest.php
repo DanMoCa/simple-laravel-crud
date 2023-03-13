@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Shark;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
@@ -43,9 +44,10 @@ class CRUDTest extends TestCase
         Shark::factory()->create(['name'=>'Shark2']);
         $response = $this->get(route('sharks.index'));
 
-        $response->assertStatus(200);
-        $response->assertSee('Shark1');
-        $response->assertSee('Shark2');
+        $response->assertStatus(200)
+            ->assertViewHas('sharks')
+            ->assertSee('Shark1')
+            ->assertSee('Shark2');
     }
 
     /**
@@ -55,18 +57,19 @@ class CRUDTest extends TestCase
      * Verify that /sharks/{shark} shows the information of a single shark
      *
      */
-    public function test_show_single_shark(): void
+    public function test_shark_show(): void
     {
         $shark = Shark::factory()->create();
 
         $response = $this->get(route('sharks.show',$shark->id));
 
-        $response->assertStatus(200);
-        $response->assertSee([
-            $shark->name,
-            $shark->email,
-            $shark->level
-        ]);
+        $response->assertStatus(200)
+            ->assertViewHas('shark')
+            ->assertSee([
+                $shark->name,
+                $shark->email,
+                $shark->level
+            ]);
     }
 
     /**
@@ -80,8 +83,8 @@ class CRUDTest extends TestCase
     {
         $response = $this->get(route('sharks.create'));
 
-        $response->assertStatus(200);
-        $response->assertSee('Create a shark');
+        $response->assertStatus(200)
+            ->assertSee('Create a shark');
     }
 
     /**
@@ -97,8 +100,9 @@ class CRUDTest extends TestCase
 
         $response = $this->get(route('sharks.edit',$shark->id));
 
-        $response->assertStatus(200);
-        $response->assertSee($shark->name);
+        $response->assertStatus(200)
+            ->assertViewHas('shark')
+            ->assertSee('Edit '.$shark->name);
     }
 
     /**
@@ -114,11 +118,15 @@ class CRUDTest extends TestCase
 
         $response = $this->post(route('sharks.store'),$data);
 
-        $response->assertRedirectToRoute('sharks.index');
+        $response->assertStatus(302)
+            ->assertRedirectToRoute('sharks.index')
+            ->assertSessionHas('message');
 
         $response = $this->get(route('sharks.index'));
 
-        $response->assertSee($data['name']);
+        $response->assertStatus(200)
+            ->assertViewHas('sharks')
+            ->assertSee($data['name']);
     }
 
     /**
@@ -136,11 +144,15 @@ class CRUDTest extends TestCase
             'name' => 'Sharknado'
         ]);
 
-        $response->assertRedirectToRoute('sharks.index');
+        $response->assertStatus(302)
+            ->assertRedirectToRoute('sharks.index')
+            ->assertSessionHas('message');
 
         $response = $this->get(route('sharks.index'));
 
-        $response->assertSee('Sharknado');
+        $response->assertStatus(200)
+            ->assertViewHas('sharks')
+            ->assertSee('Sharknado');
     }
 
     /**
@@ -156,10 +168,14 @@ class CRUDTest extends TestCase
 
         $response = $this->delete(route('sharks.destroy',$shark->id));
 
-        $response->assertRedirectToRoute('sharks.index');
+        $response->assertStatus(302)
+            ->assertRedirectToRoute('sharks.index')
+            ->assertSessionHas('message');
 
         $response = $this->get(route('sharks.index'));
 
-        $response->assertDontSee($shark->name);
+        $response->assertStatus(200)
+            ->assertViewHas('sharks')
+            ->assertDontSee($shark->name);
     }
 }
