@@ -19,5 +19,3 @@ Route::get('/', function () {
 });
 
 //TODO: Task 1 - Define the resource controller route for /sharks using the SharkController
-
-Route::resource('sharks', SharkController::class);
