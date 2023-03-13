@@ -34,7 +34,7 @@ class SharkController extends Controller
         $validator = Validator::make($request->all(),[
             'name' => ['required'],
             'email' => ['required','email'],
-            'shark_level' => ['required','numeric']
+            'shark_level' => ['required','numeric','between:1,3']
         ]);
 
         if($validator->fails()){
@@ -69,9 +69,9 @@ class SharkController extends Controller
     public function update(Request $request, Shark $shark)
     {
         $validator = Validator::make($request->all(),[
-            'name' => ['required'],
-            'email' => ['required','email'],
-            'shark_level' => ['required','numeric']
+            'name' => ['string'],
+            'email' => ['string','email'],
+            'shark_level' => ['numeric','nullable','between:1,3']
         ]);
 
         if($validator->fails()){
